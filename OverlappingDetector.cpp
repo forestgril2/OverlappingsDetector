@@ -18,7 +18,7 @@ OverlappingDetector::Overlappings OverlappingDetector::overlappings()
     Overlappings overlaps;
     
     for (const auto& mapping : m_rects)
-    {//write down all entries - rects with ids
+    {//write down mappings for rects with all region ids that contain them
         auto it = overlaps.find(mapping.second); 
         if (it == overlaps.end())
         {

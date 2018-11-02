@@ -106,7 +106,7 @@ TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePosi
     OverlappingDetector od(m);    
     
     OverlappingDetector::Overlappings overlappings_map = od.overlappings();
-    auto overlappingIt = od.overlappings().find(m[firstId]);
+    auto overlappingIt = overlappings_map.find(m[firstId]);
     auto idsSet = (*overlappingIt).second;
     ASSERT_FALSE(idsSet.find(firstId) == idsSet.end());
     ASSERT_FALSE(idsSet.find(secondId) == idsSet.end());
