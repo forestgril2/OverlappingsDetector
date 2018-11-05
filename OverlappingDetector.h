@@ -23,6 +23,7 @@ class OverlappingDetector
 {
 public:    
     OverlappingDetector() {};
+    OverlappingDetector(const OverlappingDetector& other) : m_rects(other.m_rects) {}
     OverlappingDetector(const RectIdMap& m);
     
     Overlappings overlappings();

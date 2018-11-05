@@ -15,6 +15,27 @@
 using namespace std;
 using namespace IntegerSurfaceAlgorithms;
 
+class OverlappingDetectorTest : public ::testing::Test
+{
+protected:
+    OverlappingDetector od;
+    RectIdMap m;
+    IntPoint point = {1,2}; //some default point
+    IntPoint otherPoint;
+    int firstId = 77;
+    int secondId = 99;
+    
+    OverlappingDetectorTest() 
+    {
+        otherPoint = {point[0] +1, point[1] +1};
+    }
+    
+    void setRect(int id, IntPoint a, IntPoint b)
+    {
+        m[id] = IntRect({a, b});
+        od = OverlappingDetector(m);
+    }
+};
 
 TEST(OverlappingDetector, Exists) 
 {
@@ -33,114 +54,75 @@ TEST(OverlappingDetector, HasOverlappingsFunction)
     od.overlappings();
 }
 
-TEST(OverlappingDetector, OverlappingsReturnsEmptyMapWhenNotInitialized)
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsEmptyMapWhenNotInitialized)
 {
-    OverlappingDetector od;        
     ASSERT_EQ(od.overlappings().size(), 0);
 }
 
-TEST(OverlappingDetector, OverlappingsReturnsEmptyMapWhenInitializedWithEmptyMap)
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsEmptyMapWhenInitializedWithEmptyMap)
 {
-    RectIdMap m;
     OverlappingDetector od(m);    
     
     ASSERT_EQ(od.overlappings().size(), 0);
 }
 
-TEST(OverlappingDetector, OverlappingsReturnsEmptyMapForOneElementMap)
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsEmptyMapForOneElementMap)
 {
-    RectIdMap m;
-    m[0] = {IntPoint({0,0}),IntPoint({0,0})};
-    OverlappingDetector od(m);    
+    setRect(0, point, point);    
     
     ASSERT_EQ(od.overlappings().size(), 0);
 }
 
-TEST(OverlappingDetector, OverlappingsReturnsEmptyMapForTwoPointsAtDifferentPositions)
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsEmptyMapForTwoPointsAtDifferentPositions)
 {
-    RectIdMap m;
-    m[0] = {IntPoint({1,2}),IntPoint({1,2})};
-    m[1] = m[0];
-    
-    for (auto& point : m[1])
-    {//change this point
-        for (auto& coord : point)
-        {
-            coord++;
-        }
-    }
-    for (int i = 0; i < m[0].size(); i++)
-    {
-       ASSERT_NE(m[0][i], m[1][i]);
-    }
-    OverlappingDetector od(m);    
+    setRect(0, point, point);    
+    setRect(1, otherPoint, otherPoint);
     
     ASSERT_EQ(od.overlappings().size(), 0);
 }
 
-TEST(OverlappingDetector, OverlappingsReturnsOneElementMapForTwoPointsAtTheSamePosition)
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsOneElementMapForTwoPointsAtTheSamePosition)
 {
-    RectIdMap m;
-    m[0] = {IntPoint({1,2}),IntPoint({1,2})};
-    m[1] = m[0];
-    OverlappingDetector od(m);    
+    setRect(0, point, point);    
+    setRect(1, point, point);   
     
     ASSERT_EQ(od.overlappings().size(), 1);
 }
 
-TEST(OverlappingDetector, OverlappingsReturnsCorrectOverlappingPositionForTwoPointsAtTheSamePosition)
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsCorrectOverlappingPositionForTwoPointsAtTheSamePosition)
 {
-    RectIdMap m;
-    m[0] = {IntPoint({1,2}),IntPoint({1,2})};
-    m[1] = m[0];
-    OverlappingDetector od(m);
+    setRect(0, point, point);    
+    setRect(1, point, point);   
     
     ASSERT_EQ((*od.overlappings().begin()).first, m[0]);
 }
 
-TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePosition)
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePosition)
 {
-    RectIdMap m;
-    
-    int firstId = 77;
-    int secondId = 99;
-    m[firstId] = {IntPoint({1,2}), IntPoint({1,2})};
-    m[secondId] = m[firstId];
-
-    OverlappingDetector od(m);    
+    setRect(firstId, point, point);    
+    setRect(secondId, point, point);   
     
     auto idsSet = (*od.overlappings().find(m[firstId])).second;
     ASSERT_TRUE(idsSet.find(firstId) != idsSet.end());
     ASSERT_TRUE(idsSet.find(secondId) != idsSet.end());
 }
 
-TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePositionAndCanCallItMultipleTimes)
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePositionAndCanCallItMultipleTimes)
 {
-    RectIdMap m;
-    
-    int firstId = 77;
-    int secondId = 99;
-    m[firstId] = {IntPoint({1,2}), IntPoint({1,2})};
-    m[secondId] = m[firstId];
-
-    OverlappingDetector od(m);    
+    setRect(firstId, point, point);    
+    setRect(secondId, point, point);     
     
     ASSERT_TRUE((*od.overlappings().find(m[firstId])).second.find(firstId) != (*od.overlappings().find(m[firstId])).second.end());
     ASSERT_TRUE((*od.overlappings().find(m[firstId])).second.find(secondId) != (*od.overlappings().find(m[firstId])).second.end());
 }
 
-TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForThreePointsAtTheSamePosition)
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsCorrectIdsForThreePointsAtTheSamePosition)
 {
-    RectIdMap m;
-    
-    int firstId = 77;
-    int secondId = 99;
     int thirdId = 888;
-    m[firstId] = {IntPoint({1,2}), IntPoint({1,2})};
-    m[secondId] = m[firstId];
-    m[thirdId] = m[firstId];
-
-    OverlappingDetector od(m);    
+    
+    setRect(firstId, point, point);    
+    setRect(secondId, point, point);
+    setRect(thirdId, point, point);
     
     auto idsSet = (*od.overlappings().find(m[firstId])).second;
     ASSERT_TRUE(idsSet.find(firstId) != idsSet.end());
@@ -148,18 +130,13 @@ TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForThreePointsAtTheSamePo
     ASSERT_TRUE(idsSet.find(thirdId) != idsSet.end());
 }
 
-TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePositionAndNotForThirdAtWrongPosition)
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePositionAndNotForThirdAtWrongPosition)
 {
-    RectIdMap m;
-    
-    int firstId = 77;
-    int secondId = 99;
     int thirdId = 888;
-    m[firstId] = {IntPoint({1,2}),IntPoint({1,2})};
-    m[secondId] = m[firstId];
-    m[thirdId] = {IntPoint({2,3}),IntPoint({2,3})};
-
-    OverlappingDetector od(m);    
+    
+    setRect(firstId, point, point);    
+    setRect(secondId, point, point);
+    setRect(thirdId, otherPoint, otherPoint);   
     
     auto idsSet = (*od.overlappings().find(m[firstId])).second;
     ASSERT_TRUE(idsSet.find(firstId) != idsSet.end());
@@ -167,16 +144,12 @@ TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePosi
     ASSERT_FALSE(idsSet.find(thirdId) != idsSet.end());
 }
 
-TEST(OverlappingDetector, OverlappingsReturnsCorrectRectangleForTwoSimplestIdenticalRectangles)
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsCorrectRectangleForTwoSimplestIdenticalRectangles)
 {
-    RectIdMap m;
+    otherPoint = {point[0], point[1] +1};
     
-    int firstId = 77;
-    int secondId = 99;
-    m[firstId] = {IntPoint({2,2}),IntPoint({2,3})};
-    m[secondId] = m[firstId];
-
-    OverlappingDetector od(m);    
+    setRect(firstId, point, otherPoint);    
+    setRect(secondId, point, otherPoint);    
     
     auto overlappingFound = (*od.overlappings().find(m[firstId]));
     auto rect = overlappingFound.first;
@@ -186,16 +159,13 @@ TEST(OverlappingDetector, OverlappingsReturnsCorrectRectangleForTwoSimplestIdent
     ASSERT_EQ(rect, m[firstId]);
 }
 
-TEST(OverlappingDetector, OverlappingsReturnsOneElementMapForTwoSimplestNonIdenticalOverlappingRectangles)
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsOneElementMapForTwoSimplestNonIdenticalOverlappingRectangles)
 {
-    RectIdMap m;
+    otherPoint = {point[0], point[1] +1};
+    IntPoint nextPoint = {otherPoint[0], otherPoint[1] +1};
     
-    int firstId = 77;
-    int secondId = 99;
-    m[firstId] = {IntPoint({2,2}),IntPoint({2,3})};
-    m[secondId] = {IntPoint({2,3}),IntPoint({2,4})};
-    
-    OverlappingDetector od(m);    
+    setRect(firstId, point, otherPoint);    
+    setRect(secondId, otherPoint, nextPoint); 
     
     ASSERT_EQ(od.overlappings().size(), 1);
 
