@@ -19,6 +19,12 @@ public:
     Overlappings overlappings();
 
 private:
+    
+    int x0(const IntRect& r) {return r[0];}
+    int x1(const IntRect& r) {return r[2];}
+    int y0(const IntRect& r) {return r[1];}
+    int y1(const IntRect& r) {return r[3];}
+    
     RectIdMap m_rects;
 };
 
