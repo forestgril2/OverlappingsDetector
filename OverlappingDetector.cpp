@@ -4,6 +4,7 @@
 #include <vector>
 
 using namespace std;
+using namespace IntegerSurfaceAlgorithms;
 
 OverlappingDetector::OverlappingDetector(const RectIdMap& m)
 {
@@ -13,7 +14,7 @@ OverlappingDetector::OverlappingDetector(const RectIdMap& m)
     }
 }
 
-OverlappingDetector::Overlappings OverlappingDetector::overlappings()
+Overlappings OverlappingDetector::overlappings()
 {
     Overlappings overlappingRectsToIdsSetMap;
     
@@ -42,21 +43,18 @@ OverlappingDetector::Overlappings OverlappingDetector::overlappings()
             auto A = overlappingRect;
             auto B = freeRect;
             
-            bool Ax0WithinB = (x0(B) >= x0(A) && x0(A) >= x1(B));
-            bool Ax1WithinB = (x0(B) >= x1(A) && x1(A) >= x1(B));
+            auto RectPointCoordWithinOtherRect = [this](const IntRect& A, const IntRect& B, int rectPointIndex, int coordIndex) {
+                return (B[0][coordIndex] >= A[rectPointIndex][coordIndex] && A[rectPointIndex][coordIndex] >= B[1][coordIndex]);
+            };
             
-            bool Bx0WithinA = (x0(A) >= x0(B) && x0(B) >= x0(A));
-            bool Bx1WithinA = (x0(A) >= x1(B) && x1(B) >= x0(A));
-            
-            bool Ay0WithinB = (y0(B) >= y0(A) && y0(A) >= y1(B));
-            bool Ay1WithinB = (y0(B) >= y1(A) && y1(A) >= y1(B));
-            
-            bool By0WithinA = (y0(A) >= y0(B) && y0(B) >= y0(A));
-            bool By1WithinA = (y0(A) >= y1(B) && y1(B) >= y0(A));
-            
-            
-            if(Ax0WithinB || Ax1WithinB || Bx0WithinA || Bx1WithinA || 
-               Ay0WithinB || Ay1WithinB || By0WithinA || By1WithinA)
+            if (RectPointCoordWithinOtherRect(A, B, 0, 0) ||
+                RectPointCoordWithinOtherRect(A, B, 1, 0) ||
+                RectPointCoordWithinOtherRect(A, B, 0, 1) ||
+                RectPointCoordWithinOtherRect(A, B, 1, 1) ||
+                RectPointCoordWithinOtherRect(B, A, 0, 0) ||
+                RectPointCoordWithinOtherRect(B, A, 1, 0) ||
+                RectPointCoordWithinOtherRect(B, A, 0, 1) ||
+                RectPointCoordWithinOtherRect(B, A, 1, 1))
             {//this free rect and current overlapping rect have common overlapping rect
                 overlappingRectsToIdsSetMap[overlappingRect].insert(freeId);
             }

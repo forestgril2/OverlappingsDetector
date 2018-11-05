@@ -13,6 +13,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace IntegerSurfaceAlgorithms;
 
 
 TEST(OverlappingDetector, Exists) 
@@ -22,7 +23,7 @@ TEST(OverlappingDetector, Exists)
 
 TEST(OverlappingDetector, AcceptsMapOf4IntegerArrayToIntId)
 {
-    OverlappingDetector::RectIdMap m;
+    RectIdMap m;
     OverlappingDetector od(m);
 }
 
@@ -40,7 +41,7 @@ TEST(OverlappingDetector, OverlappingsReturnsEmptyMapWhenNotInitialized)
 
 TEST(OverlappingDetector, OverlappingsReturnsEmptyMapWhenInitializedWithEmptyMap)
 {
-    OverlappingDetector::RectIdMap m;
+    RectIdMap m;
     OverlappingDetector od(m);    
     
     ASSERT_EQ(od.overlappings().size(), 0);
@@ -48,8 +49,8 @@ TEST(OverlappingDetector, OverlappingsReturnsEmptyMapWhenInitializedWithEmptyMap
 
 TEST(OverlappingDetector, OverlappingsReturnsEmptyMapForOneElementMap)
 {
-    OverlappingDetector::RectIdMap m;
-    m[0] = {0,0,0,0};
+    RectIdMap m;
+    m[0] = {IntPoint({0,0}),IntPoint({0,0})};
     OverlappingDetector od(m);    
     
     ASSERT_EQ(od.overlappings().size(), 0);
@@ -57,13 +58,16 @@ TEST(OverlappingDetector, OverlappingsReturnsEmptyMapForOneElementMap)
 
 TEST(OverlappingDetector, OverlappingsReturnsEmptyMapForTwoPointsAtDifferentPositions)
 {
-    OverlappingDetector::RectIdMap m;
-    m[0] = {1,2,1,2};
+    RectIdMap m;
+    m[0] = {IntPoint({1,2}),IntPoint({1,2})};
     m[1] = m[0];
     
-    for (auto& elem : m[1])
+    for (auto& point : m[1])
     {//change this point
-       elem++;
+        for (auto& coord : point)
+        {
+            coord++;
+        }
     }
     for (int i = 0; i < m[0].size(); i++)
     {
@@ -76,8 +80,8 @@ TEST(OverlappingDetector, OverlappingsReturnsEmptyMapForTwoPointsAtDifferentPosi
 
 TEST(OverlappingDetector, OverlappingsReturnsOneElementMapForTwoPointsAtTheSamePosition)
 {
-    OverlappingDetector::RectIdMap m;
-    m[0] = {1,2,1,2};
+    RectIdMap m;
+    m[0] = {IntPoint({1,2}),IntPoint({1,2})};
     m[1] = m[0];
     OverlappingDetector od(m);    
     
@@ -86,8 +90,8 @@ TEST(OverlappingDetector, OverlappingsReturnsOneElementMapForTwoPointsAtTheSameP
 
 TEST(OverlappingDetector, OverlappingsReturnsCorrectOverlappingPositionForTwoPointsAtTheSamePosition)
 {
-    OverlappingDetector::RectIdMap m;
-    m[0] = {1,2,1,2};
+    RectIdMap m;
+    m[0] = {IntPoint({1,2}),IntPoint({1,2})};
     m[1] = m[0];
     OverlappingDetector od(m);
     
@@ -96,11 +100,11 @@ TEST(OverlappingDetector, OverlappingsReturnsCorrectOverlappingPositionForTwoPoi
 
 TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePosition)
 {
-    OverlappingDetector::RectIdMap m;
+    RectIdMap m;
     
     int firstId = 77;
     int secondId = 99;
-    m[firstId] = {1,2,1,2};
+    m[firstId] = {IntPoint({1,2}), IntPoint({1,2})};
     m[secondId] = m[firstId];
 
     OverlappingDetector od(m);    
@@ -112,11 +116,11 @@ TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePosi
 
 TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePositionAndCanCallItMultipleTimes)
 {
-    OverlappingDetector::RectIdMap m;
+    RectIdMap m;
     
     int firstId = 77;
     int secondId = 99;
-    m[firstId] = {1,2,1,2};
+    m[firstId] = {IntPoint({1,2}), IntPoint({1,2})};
     m[secondId] = m[firstId];
 
     OverlappingDetector od(m);    
@@ -127,12 +131,12 @@ TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePosi
 
 TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForThreePointsAtTheSamePosition)
 {
-    OverlappingDetector::RectIdMap m;
+    RectIdMap m;
     
     int firstId = 77;
     int secondId = 99;
     int thirdId = 888;
-    m[firstId] = {1,2,1,2};
+    m[firstId] = {IntPoint({1,2}), IntPoint({1,2})};
     m[secondId] = m[firstId];
     m[thirdId] = m[firstId];
 
@@ -146,14 +150,14 @@ TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForThreePointsAtTheSamePo
 
 TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePositionAndNotForThirdAtWrongPosition)
 {
-    OverlappingDetector::RectIdMap m;
+    RectIdMap m;
     
     int firstId = 77;
     int secondId = 99;
     int thirdId = 888;
-    m[firstId] = {1,2,1,2};
+    m[firstId] = {IntPoint({1,2}),IntPoint({1,2})};
     m[secondId] = m[firstId];
-    m[thirdId] = {2,3,2,3};
+    m[thirdId] = {IntPoint({2,3}),IntPoint({2,3})};
 
     OverlappingDetector od(m);    
     
@@ -165,11 +169,11 @@ TEST(OverlappingDetector, OverlappingsReturnsCorrectIdsForTwoPointsAtTheSamePosi
 
 TEST(OverlappingDetector, OverlappingsReturnsCorrectRectangleForTwoSimplestIdenticalRectangles)
 {
-    OverlappingDetector::RectIdMap m;
+    RectIdMap m;
     
     int firstId = 77;
     int secondId = 99;
-    m[firstId] = {2,2,2,3};
+    m[firstId] = {IntPoint({2,2}),IntPoint({2,3})};
     m[secondId] = m[firstId];
 
     OverlappingDetector od(m);    
@@ -184,12 +188,12 @@ TEST(OverlappingDetector, OverlappingsReturnsCorrectRectangleForTwoSimplestIdent
 
 TEST(OverlappingDetector, OverlappingsReturnsOneElementMapForTwoSimplestNonIdenticalOverlappingRectangles)
 {
-    OverlappingDetector::RectIdMap m;
+    RectIdMap m;
     
     int firstId = 77;
     int secondId = 99;
-    m[firstId] = {2,2,2,3};
-    m[secondId] = {2,3,2,4};
+    m[firstId] = {IntPoint({2,2}),IntPoint({2,3})};
+    m[secondId] = {IntPoint({2,3}),IntPoint({2,4})};
     
     OverlappingDetector od(m);    
     
