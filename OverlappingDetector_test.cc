@@ -181,13 +181,25 @@ TEST_F(OverlappingDetectorTest, OverlappingsReturnsCorrectRectangleForTwoSimples
     setRect(firstId, point, otherPoint);    
     setRect(secondId, otherPoint, nextPoint); 
     
-    auto overlappingFound = (*od.overlappings().find(m[firstId]));
-    auto rectFound = overlappingFound.first;
-    auto idsSet = overlappingFound.second;
-    
-    ASSERT_TRUE(idsSet.find(firstId) != idsSet.end());
-    ASSERT_TRUE(idsSet.find(secondId) != idsSet.end());
-    
-    ASSERT_EQ(rectFound, expectedResult);
+    auto overlappings = od.overlappings();
+    ASSERT_TRUE(overlappings.find(expectedResult) != overlappings.end());
 }
 
+TEST_F(OverlappingDetectorTest, OverlappingsReturnsCorrectIdsTwoSimplestNonIdenticalOverlappingRectangles)
+{
+    otherPoint = {point[0], point[1] +1};
+    IntPoint nextPoint = {otherPoint[0], otherPoint[1] +1};
+    
+    IntRect expectedResult = {otherPoint, otherPoint};
+    
+    setRect(firstId, point, otherPoint);    
+    setRect(secondId, otherPoint, nextPoint); 
+    
+    auto overlappingFoundsId = (*(od.overlappings().find(expectedResult))).second;
+    ASSERT_TRUE(overlappingFoundsId.find(firstId) != overlappingFoundsId.end());
+    ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
+}
+
+// TEST_F(OverlappingDetectorTest, OverlappingCorrectForNegativePointOrdering)
+// {
+// }
