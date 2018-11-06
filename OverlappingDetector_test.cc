@@ -25,7 +25,7 @@ protected:
     int firstId = 77;
     int secondId = 99;
     
-    OverlappingDetectorTest() 
+    OverlappingDetectorTest()
     {
         otherPoint = {point[0] +1, point[1] +1};
     }
