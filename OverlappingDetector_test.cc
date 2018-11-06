@@ -365,24 +365,24 @@ TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingsReturnsCorrectIdsW
     ASSERT_TRUE(overlappingFoundsId.find(thirdId) != overlappingFoundsId.end());
 }
         
-// TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingsReturnsTwoElementMapWhenThirdRectAddedInsideBiggerOneSide)
-// {
-//     //     ---------
-//     //     |       |
-//     //     |   -------------
-//     //     |   |   |   |   | 
-//     //     |   |   |   |   | 
-//     //     -------------   |
-//     //         |           |
-//     //         -------------
-//     
-//     int thirdId = 999;
-//     setRect(firstId, Astart, Aend);
-//     setRect(secondId, Bstart, Bend);
-//     
-//     IntPoint insideEnd = expectedResult[1];
-//     insideEnd[0] += 2; // basis longer
-//     setRect(thirdId, expectedResult[0], insideEnd);
-//     
-//     ASSERT_EQ(od.overlappings().size(), 2);
-// }
+TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingsReturnsTwoElementMapWhenThirdRectAddedInsideBiggerOneSide)
+{
+    //     ---------
+    //     |       |
+    //     |   -------------
+    //     |   |   |   |   | 
+    //     |   |   |   |   | 
+    //     -------------   |
+    //         |           |
+    //         -------------
+    
+    int thirdId = 999;
+    setRect(firstId, Astart, Aend);
+    setRect(secondId, Bstart, Bend);
+    
+    IntPoint insideEnd = expectedResult[1];
+    insideEnd[0] += 2; // basis longer
+    setRect(thirdId, expectedResult[0], insideEnd);
+    
+    ASSERT_EQ(od.overlappings().size(), 2);
+}
