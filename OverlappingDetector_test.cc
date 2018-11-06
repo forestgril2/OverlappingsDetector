@@ -200,52 +200,6 @@ TEST_F(OverlappingDetectorTest, OverlappingsReturnsCorrectIdsTwoSimplestNonIdent
     ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
 }
 
-TEST_F(OverlappingDetectorTest, OverlappingsReturnsOneElementMapForTwoNonSimplestNonIdenticalOverlappingRectangles)
-{
-    IntPoint Astart = {23, 47};
-    IntPoint Aend = {73, 87};
-    IntPoint Bstart = {63, 67};
-    IntPoint Bend = {103, 200};
-    
-    setRect(firstId, Astart, Aend);    
-    setRect(secondId, Bstart, Bend); 
-    
-    ASSERT_EQ(od.overlappings().size(), 1);
-}
-
-TEST_F(OverlappingDetectorTest, OverlappingsReturnsCorrectRectangleForTwoNonSimplestNonIdenticalOverlappingRectangles)
-{
-    IntPoint Astart = {23, 47};
-    IntPoint Aend = {73, 87};
-    IntPoint Bstart = {63, 67};
-    IntPoint Bend = {103, 200};
-    
-    IntRect expectedResult = {Bstart, Aend};
-    
-    setRect(firstId, Astart, Aend);    
-    setRect(secondId, Bstart, Bend); 
-    
-    auto overlappings = od.overlappings();
-    ASSERT_TRUE(overlappings.find(expectedResult) != overlappings.end());
-}
-
-TEST_F(OverlappingDetectorTest, OverlappingsReturnsCorrectIdsTwoNonSimplestNonIdenticalOverlappingRectangles)
-{
-    IntPoint Astart = {23, 47};
-    IntPoint Aend = {73, 87};
-    IntPoint Bstart = {63, 67};
-    IntPoint Bend = {103, 200};
-    
-    IntRect expectedResult = {Bstart, Aend};
-    
-    setRect(firstId, Astart, Aend);    
-    setRect(secondId, Bstart, Bend);
-    
-    auto overlappingFoundsId = (*(od.overlappings().find(expectedResult))).second;
-    ASSERT_TRUE(overlappingFoundsId.find(firstId) != overlappingFoundsId.end());
-    ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
-}
-
 TEST_F(OverlappingDetectorTest, OverlappingsReturnsOneCorrectMappingForThreeSimplestNonIdenticalOverlappingRectangles)
 {
     int thirdId = 999;
@@ -266,18 +220,53 @@ TEST_F(OverlappingDetectorTest, OverlappingsReturnsOneCorrectMappingForThreeSimp
     ASSERT_TRUE(overlappingFoundsId.find(firstId) != overlappingFoundsId.end());
     ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
     ASSERT_TRUE(overlappingFoundsId.find(thirdId) != overlappingFoundsId.end());
-
 }
 
-TEST_F(OverlappingDetectorTest, OverlappingCorrectForNegativePointOrdering1)
+class OverlappingDetectorTestNonTrivialRects : public OverlappingDetectorTest
 {
+protected:
     IntPoint Astart = {23, 47};
     IntPoint Aend = {73, 87};
     IntPoint Bstart = {63, 67};
     IntPoint Bend = {103, 200};
     
-    IntRect expectedResult = {Bstart, Aend};
+    IntRect expectedResult;
     
+    OverlappingDetectorTestNonTrivialRects() : OverlappingDetectorTest()
+    {
+        expectedResult = {Bstart, Aend};
+    }
+};
+
+TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingsReturnsOneElementMap)
+{
+    setRect(firstId, Astart, Aend);    
+    setRect(secondId, Bstart, Bend); 
+    
+    ASSERT_EQ(od.overlappings().size(), 1);
+}
+
+TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingsReturnsCorrectRectangle)
+{
+    setRect(firstId, Astart, Aend);    
+    setRect(secondId, Bstart, Bend); 
+    
+    auto overlappings = od.overlappings();
+    ASSERT_TRUE(overlappings.find(expectedResult) != overlappings.end());
+}
+
+TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingsReturnsCorrectIds)
+{
+    setRect(firstId, Astart, Aend);    
+    setRect(secondId, Bstart, Bend);
+    
+    auto overlappingFoundsId = (*(od.overlappings().find(expectedResult))).second;
+    ASSERT_TRUE(overlappingFoundsId.find(firstId) != overlappingFoundsId.end());
+    ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
+}
+
+TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingCorrectForNegativePointOrderingForA)
+{    
     setRect(firstId, Aend, Astart);    
     setRect(secondId, Bstart, Bend);
     
@@ -286,15 +275,8 @@ TEST_F(OverlappingDetectorTest, OverlappingCorrectForNegativePointOrdering1)
     ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
 }
 
-TEST_F(OverlappingDetectorTest, OverlappingCorrectForNegativePointOrdering2)
+TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingCorrectForNegativePointOrderingForB)
 {
-    IntPoint Astart = {23, 47};
-    IntPoint Aend = {73, 87};
-    IntPoint Bstart = {63, 67};
-    IntPoint Bend = {103, 200};
-    
-    IntRect expectedResult = {Bstart, Aend};
-    
     setRect(firstId, Astart, Aend);    
     setRect(secondId, Bend, Bstart);
     
@@ -303,15 +285,8 @@ TEST_F(OverlappingDetectorTest, OverlappingCorrectForNegativePointOrdering2)
     ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
 }
 
-TEST_F(OverlappingDetectorTest, OverlappingCorrectForNegativePointOrdering3)
+TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingCorrectForNegativePointOrderingForAandB)
 {
-    IntPoint Astart = {23, 47};
-    IntPoint Aend = {73, 87};
-    IntPoint Bstart = {63, 67};
-    IntPoint Bend = {103, 200};
-    
-    IntRect expectedResult = {Bstart, Aend};
-    
     setRect(firstId, Aend, Astart);    
     setRect(secondId, Bend, Bstart);
     
