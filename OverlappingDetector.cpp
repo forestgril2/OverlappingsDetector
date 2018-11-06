@@ -38,99 +38,63 @@ Overlappings OverlappingDetector::overlappings()
                 continue;
             }
             
-            auto overlappingRect = overlappingRectToIds.first;
+            auto ovlapRect = overlappingRectToIds.first;
             
-            auto A = overlappingRect;
-            auto B = freeRect;
+            IntPoint newOvlapStart;
+            IntPoint newOvlapEnd;
             
-            auto RectPointCoordWithinOtherRect = [this](const IntRect& rect, const IntRect& other, int point, int coord) {
-                
+            auto resolveOverlappingRectStartsInOther = [&](const IntRect& rect, const IntRect& other, int coord) {
                 auto otherStart = other[0][coord];
                 auto otherEnd = other[1][coord];
-                auto rectPoint = rect[point][coord];
+                auto rectPoint = rect[0][coord];
                 
-                return otherStart <= rectPoint && rectPoint <= otherEnd;
+                if (otherStart <= rectPoint && rectPoint <= otherEnd)
+                {//rect coord starts in other
+                    newOvlapStart[coord] = rect[0][coord];
+                    
+                    rectPoint = rect[1][coord];
+                    if (otherStart <= rectPoint && rectPoint <= otherEnd)
+                    {//rect coord ends in other
+                        newOvlapEnd[coord] = rect[1][coord];
+                    }
+                    else
+                    {//overlapping ends on other end
+                        newOvlapEnd[coord] = other[1][coord];
+                    }
+                    return true;
+                }
+                return false;
             };
             
-            IntPoint ovlapStart;
-            IntPoint ovlapEnd;
             
-            bool xIsOverlapping = false;
-            if (RectPointCoordWithinOtherRect(A, B, 0, 0))
-            {//A x starts in B
-                xIsOverlapping  = true;
-                ovlapStart[0] = A[0][0];
-                if (RectPointCoordWithinOtherRect(A, B, 1, 0))
-                {//A x ends in B
-                    ovlapEnd[0] = A[1][0];
-                }
-                else
-                {//overlapping ends on B end
-                    ovlapEnd[0] = B[1][0];
-                }
-            }
-            else if (RectPointCoordWithinOtherRect(B, A, 0, 0))
-            {//B x starts in A
-                xIsOverlapping = true;
-                ovlapStart[0] = B[0][0];
-                if (RectPointCoordWithinOtherRect(B, A, 1, 0))
-                {//B x ends in A
-                    ovlapEnd[0] = B[1][0];
-                }
-                else
-                {//overlapping ends on A end
-                    ovlapEnd[0] = A[1][0];
-                }
+            bool xIsOverlapping = resolveOverlappingRectStartsInOther(ovlapRect, freeRect, 0);
+            if (!xIsOverlapping )
+            {
+                xIsOverlapping = resolveOverlappingRectStartsInOther(freeRect, ovlapRect, 0);
             }
             
             if (xIsOverlapping)
             {//don't check y, if x is not overlapping
-                bool yIsOverlapping = false;
-                if (RectPointCoordWithinOtherRect(A, B, 0, 1))
-                {//A y starts in B
-                    yIsOverlapping = true;
-                    ovlapStart[1] = A[0][1];
-                    if (RectPointCoordWithinOtherRect(A, B, 1, 1))
-                    {//A y ends in B
-                        ovlapEnd[1] = A[1][1];
-                    }
-                    else
-                    {//overlapping ends on B end
-                        ovlapEnd[1] = B[1][1];
-                    }
-                }
-                else if (RectPointCoordWithinOtherRect(B, A, 0, 1))
-                {//B y stars in A
-                    yIsOverlapping = true;
-                    ovlapStart[1] = B[0][1];
-                    if (RectPointCoordWithinOtherRect(B, A, 1, 1))
-                    {//B y ends in A
-                        ovlapEnd[1] = B[1][1];
-                    }
-                    else
-                    {//overlapping ends on A end
-                        ovlapEnd[1] = A[1][1];
-                    }
+                bool yIsOverlapping = resolveOverlappingRectStartsInOther(ovlapRect, freeRect, 1);
+                if (!yIsOverlapping )
+                {
+                    yIsOverlapping = resolveOverlappingRectStartsInOther(freeRect, ovlapRect, 1);
                 }
                 
                 if (yIsOverlapping)
                 {//this free rect and current overlapping rect have common overlapping rect
-                    overlappingRect = IntRect({ovlapStart, ovlapEnd});
-                    overlappingRectsToIdsSetMap[overlappingRect].insert(freeId);
-                    auto setSize = overlappingIdSet.size();
-                    if (setSize > 0)
+                    ovlapRect = IntRect({newOvlapStart, newOvlapEnd});
+                    overlappingRectsToIdsSetMap[ovlapRect].insert(freeId);
+                    for (const auto& id : overlappingIdSet)
                     {
-                        for (const auto& id : overlappingIdSet)
-                        {
-                            overlappingRectsToIdsSetMap[overlappingRect].insert(id);
-                        }
+                        overlappingRectsToIdsSetMap[ovlapRect].insert(id);
                     }
                 }
             }
         }
     }
     
-    for (auto r : overlappingRectsToIdsSetMap)
+    for (const auto& r : overlappingRectsToIdsSetMap)
     {//remove single entries - rects, for which only one id exists
         if (r.second.size() < 2)
         {
