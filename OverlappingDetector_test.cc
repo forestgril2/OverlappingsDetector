@@ -222,8 +222,17 @@ TEST_F(OverlappingDetectorTest, OverlappingsReturnsOneCorrectMappingForThreeSimp
     ASSERT_TRUE(overlappingFoundsId.find(thirdId) != overlappingFoundsId.end());
 }
 
-class OverlappingDetectorTestNonTrivialRects : public OverlappingDetectorTest
+class OverlappingDetectorTestTwoNonTrivialRects : public OverlappingDetectorTest
 {
+    //     ---------
+    //     |       |
+    //     |   ---------
+    //     |   |   |   |
+    //     |   |   |   |
+    //     ---------   |
+    //         |       |
+    //         ---------
+    
 protected:
     IntPoint Astart = {23, 47};
     IntPoint Aend = {73, 87};
@@ -232,13 +241,13 @@ protected:
     
     IntRect expectedResult;
     
-    OverlappingDetectorTestNonTrivialRects() : OverlappingDetectorTest()
+    OverlappingDetectorTestTwoNonTrivialRects() : OverlappingDetectorTest()
     {
         expectedResult = {Bstart, Aend};
     }
 };
 
-TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingsReturnsOneElementMap)
+TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingsReturnsOneElementMap)
 {
     setRect(firstId, Astart, Aend);    
     setRect(secondId, Bstart, Bend); 
@@ -246,7 +255,7 @@ TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingsReturnsOneElementMap)
     ASSERT_EQ(od.overlappings().size(), 1);
 }
 
-TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingsReturnsCorrectRectangle)
+TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingsReturnsCorrectRectangle)
 {
     setRect(firstId, Astart, Aend);    
     setRect(secondId, Bstart, Bend); 
@@ -255,7 +264,7 @@ TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingsReturnsCorrectRectang
     ASSERT_TRUE(overlappings.find(expectedResult) != overlappings.end());
 }
 
-TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingsReturnsCorrectIds)
+TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingsReturnsCorrectIds)
 {
     setRect(firstId, Astart, Aend);    
     setRect(secondId, Bstart, Bend);
@@ -265,7 +274,7 @@ TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingsReturnsCorrectIds)
     ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
 }
 
-TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingCorrectForNegativePointOrderingForA)
+TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingCorrectForNegativePointOrderingForA)
 {    
     setRect(firstId, Aend, Astart);    
     setRect(secondId, Bstart, Bend);
@@ -275,7 +284,7 @@ TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingCorrectForNegativePoin
     ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
 }
 
-TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingCorrectForNegativePointOrderingForB)
+TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingCorrectForNegativePointOrderingForB)
 {
     setRect(firstId, Astart, Aend);    
     setRect(secondId, Bend, Bstart);
@@ -285,7 +294,7 @@ TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingCorrectForNegativePoin
     ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
 }
 
-TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingCorrectForNegativePointOrderingForAandB)
+TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingCorrectForNegativePointOrderingForAandB)
 {
     setRect(firstId, Aend, Astart);    
     setRect(secondId, Bend, Bstart);
@@ -294,3 +303,86 @@ TEST_F(OverlappingDetectorTestNonTrivialRects, OverlappingCorrectForNegativePoin
     ASSERT_TRUE(overlappingFoundsId.find(firstId) != overlappingFoundsId.end());
     ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
 }
+
+TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingCorrectForNegativePointOrderingForB_reverseIds)
+{
+    setRect(firstId, Bend, Bstart);
+    setRect(secondId, Astart, Aend);
+    
+    auto overlappingFoundsId = (*(od.overlappings().find(expectedResult))).second;
+    ASSERT_TRUE(overlappingFoundsId.find(firstId) != overlappingFoundsId.end());
+    ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
+}
+
+TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingCorrectForMixedXYPointOrdering)
+{
+    Astart = {23, 47};
+    Aend = {73, 87};
+    Bstart = {63, 27}; // B start y is lower than A start y
+    Bend = {103, 67}; // B end y is lower than A end y
+    
+    expectedResult = {IntPoint({Bstart[0], Astart[1]}),IntPoint({Aend[0], Bend[1]})};
+    
+    setRect(firstId,  Astart, Aend);
+    setRect(secondId, Bstart, Bend);
+    
+    auto overlappingFoundsId = (*(od.overlappings().find(expectedResult))).second;
+    ASSERT_TRUE(overlappingFoundsId.find(firstId) != overlappingFoundsId.end());
+    ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
+}
+
+TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingsReturnsOneElementMapWhenThirdRectAddedInside)
+{
+    int thirdId = 999;
+    setRect(firstId, Astart, Aend);    
+    setRect(secondId, Bstart, Bend);
+    setRect(thirdId, expectedResult[0], expectedResult[1]);
+    
+    ASSERT_EQ(od.overlappings().size(), 1);
+}
+
+TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingsReturnsCorrectRectangleWhenThirdRectAddedInside)
+{
+    int thirdId = 999;
+    setRect(firstId, Astart, Aend);    
+    setRect(secondId, Bstart, Bend);
+    setRect(thirdId, expectedResult[0], expectedResult[1]);
+    
+    auto overlappings = od.overlappings();
+    ASSERT_TRUE(overlappings.find(expectedResult) != overlappings.end());
+}
+
+TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingsReturnsCorrectIdsWhenThirdRectAddedInside)
+{
+    int thirdId = 999;
+    setRect(firstId, Astart, Aend);    
+    setRect(secondId, Bstart, Bend);
+    setRect(thirdId, expectedResult[0], expectedResult[1]);
+    
+    auto overlappingFoundsId = (*(od.overlappings().find(expectedResult))).second;
+    ASSERT_TRUE(overlappingFoundsId.find(firstId) != overlappingFoundsId.end());
+    ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
+    ASSERT_TRUE(overlappingFoundsId.find(thirdId) != overlappingFoundsId.end());
+}
+        
+// TEST_F(OverlappingDetectorTestTwoNonTrivialRects, OverlappingsReturnsTwoElementMapWhenThirdRectAddedInsideBiggerOneSide)
+// {
+//     //     ---------
+//     //     |       |
+//     //     |   -------------
+//     //     |   |   |   |   | 
+//     //     |   |   |   |   | 
+//     //     -------------   |
+//     //         |           |
+//     //         -------------
+//     
+//     int thirdId = 999;
+//     setRect(firstId, Astart, Aend);
+//     setRect(secondId, Bstart, Bend);
+//     
+//     IntPoint insideEnd = expectedResult[1];
+//     insideEnd[0] += 2; // basis longer
+//     setRect(thirdId, expectedResult[0], insideEnd);
+//     
+//     ASSERT_EQ(od.overlappings().size(), 2);
+// }
