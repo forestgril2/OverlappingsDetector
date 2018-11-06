@@ -269,6 +269,53 @@ TEST_F(OverlappingDetectorTest, OverlappingsReturnsOneCorrectMappingForThreeSimp
 
 }
 
-// TEST_F(OverlappingDetectorTest, OverlappingCorrectForNegativePointOrdering)
-// {
-// }
+TEST_F(OverlappingDetectorTest, OverlappingCorrectForNegativePointOrdering1)
+{
+    IntPoint Astart = {23, 47};
+    IntPoint Aend = {73, 87};
+    IntPoint Bstart = {63, 67};
+    IntPoint Bend = {103, 200};
+    
+    IntRect expectedResult = {Bstart, Aend};
+    
+    setRect(firstId, Aend, Astart);    
+    setRect(secondId, Bstart, Bend);
+    
+    auto overlappingFoundsId = (*(od.overlappings().find(expectedResult))).second;
+    ASSERT_TRUE(overlappingFoundsId.find(firstId) != overlappingFoundsId.end());
+    ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
+}
+
+TEST_F(OverlappingDetectorTest, OverlappingCorrectForNegativePointOrdering2)
+{
+    IntPoint Astart = {23, 47};
+    IntPoint Aend = {73, 87};
+    IntPoint Bstart = {63, 67};
+    IntPoint Bend = {103, 200};
+    
+    IntRect expectedResult = {Bstart, Aend};
+    
+    setRect(firstId, Astart, Aend);    
+    setRect(secondId, Bend, Bstart);
+    
+    auto overlappingFoundsId = (*(od.overlappings().find(expectedResult))).second;
+    ASSERT_TRUE(overlappingFoundsId.find(firstId) != overlappingFoundsId.end());
+    ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
+}
+
+TEST_F(OverlappingDetectorTest, OverlappingCorrectForNegativePointOrdering3)
+{
+    IntPoint Astart = {23, 47};
+    IntPoint Aend = {73, 87};
+    IntPoint Bstart = {63, 67};
+    IntPoint Bend = {103, 200};
+    
+    IntRect expectedResult = {Bstart, Aend};
+    
+    setRect(firstId, Aend, Astart);    
+    setRect(secondId, Bend, Bstart);
+    
+    auto overlappingFoundsId = (*(od.overlappings().find(expectedResult))).second;
+    ASSERT_TRUE(overlappingFoundsId.find(firstId) != overlappingFoundsId.end());
+    ASSERT_TRUE(overlappingFoundsId.find(secondId) != overlappingFoundsId.end());
+}
